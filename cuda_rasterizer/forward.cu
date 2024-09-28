@@ -360,14 +360,15 @@ renderCUDA(
 				continue;
 			}
 
+			// Eq. (3) from 3D Gaussian splatting paper.
+			for (int ch = 0; ch < CHANNELS; ch++)
+			{
+				C[ch] += features[collected_id[j] * CHANNELS + ch] * alpha * T;
+			}
 			for (int ch = 0; ch < CHANNELS_CONF; ch++)
 			{
 				F[ch] += conf_features[collected_id[j] * CHANNELS_CONF + ch] * alpha * T;
-			}
-
-			// Eq. (3) from 3D Gaussian splatting paper.
-			for (int ch = 0; ch < CHANNELS; ch++)
-				C[ch] += features[collected_id[j] * CHANNELS + ch] * alpha * T;
+			}			
             Dep += depths[collected_id[j]] * alpha * T;
             Wei += alpha * T;
 			T = test_T;

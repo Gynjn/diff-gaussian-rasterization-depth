@@ -429,7 +429,7 @@ renderCUDA(
 	float4* __restrict__ dL_dconic2D,
 	float* __restrict__ dL_dopacity,
 	float* __restrict__ dL_dcolors,
-	float* __restrict__ dL_dconf,
+	float* __restrict__ dL_dconfs,
     float* __restrict__ dL_ddepths
     )
 {
@@ -456,7 +456,7 @@ renderCUDA(
 	__shared__ float2 collected_xy[BLOCK_SIZE];
 	__shared__ float4 collected_conic_opacity[BLOCK_SIZE];
 	__shared__ float collected_colors[C * BLOCK_SIZE];
-	__shared__ float collected_conf[C_CONF * BLOCK_SIZE];
+	__shared__ float collected_confs[C_CONF * BLOCK_SIZE];
     __shared__ float collected_depths[BLOCK_SIZE];
 
 	// In the forward, we stored the final value for T, the
@@ -515,7 +515,7 @@ renderCUDA(
             for (int i = 0; i < C; i++)
 				collected_colors[i * BLOCK_SIZE + block.thread_rank()] = colors[coll_id * C + i];
 			for (int i = 0; i < C_CONF; i++)
-				collected_conf[i * BLOCK_SIZE + block.thread_rank()] = conf[coll_id * C_CONF + i];
+				collected_confs[i * BLOCK_SIZE + block.thread_rank()] = conf[coll_id * C_CONF + i];
 		}
 		block.sync();
 
@@ -572,7 +572,7 @@ renderCUDA(
 			for (int ch = 0; ch < C_CONF; ch++)
 			{
 				const float dl_dfchannel = dL_dconfm[ch];
-				atomicAdd(&(dL_dconf[global_id * C_CONF + ch]), dchannel_dcolor * dl_dfchannel);
+				atomicAdd(&(dL_dconfs[global_id * C_CONF + ch]), dchannel_dcolor * dl_dfchannel);
 			}
 
             {   //+dW_dalpha
@@ -715,7 +715,7 @@ void BACKWARD::render(
 	float4* dL_dconic2D,
 	float* dL_dopacity,
 	float* dL_dcolors,              //[output], partial derivatives of each GS color
-	float* dL_dconf,                //[output], partial derivatives of each GS conf
+	float* dL_dconfs,                //[output], partial derivatives of each GS conf
     float* dL_ddepths               //[output], partial derivatives of each GS depth
     )
 {
@@ -740,7 +740,7 @@ void BACKWARD::render(
 		dL_dconic2D,
 		dL_dopacity,
 		dL_dcolors,
-		dL_dconf,
+		dL_dconfs,
         dL_ddepths
 		);
 }

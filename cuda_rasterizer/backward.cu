@@ -709,6 +709,7 @@ void BACKWARD::render(
     const float* final_Ds,          //imgState.accum_depths
 	const uint32_t* n_contrib,      //imgState.n_contrib
 	const float* dL_dpixels,        //[in], Calculated by pytorch
+	const float* dL_dconfm,          //[in], Calculated by pytorch
     const float* dL_dDs,            //[in], Calculated by pytorch
 	float3* dL_dmean2D,
 	float4* dL_dconic2D,
@@ -733,6 +734,7 @@ void BACKWARD::render(
         final_Ds,
 		n_contrib,
 		dL_dpixels,
+		dL_dconfm,
         dL_dDs,
 		dL_dmean2D,
 		dL_dconic2D,

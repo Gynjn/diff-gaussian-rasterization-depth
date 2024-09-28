@@ -423,7 +423,7 @@ renderCUDA(
     const float* __restrict__ final_Ds,
 	const uint32_t* __restrict__ n_contrib,
 	const float* __restrict__ dL_dpixels,
-	const float* __restrict__ dL_dconfm,
+	const float* __restrict__ dL_dconfms,
     const float* __restrict__ dL_dDs,
 	float3* __restrict__ dL_dmean2D,
 	float4* __restrict__ dL_dconic2D,
@@ -485,7 +485,7 @@ renderCUDA(
         for (int i = 0; i < C; i++)
             dL_dpixel[i] = dL_dpixels[i * H * W + pix_id];
 		for (int i = 0; i < C_CONF; i++)
-			dL_dconfm[i] = dL_dconfm[i * H * W + pix_id];
+			dL_dconfm[i] = dL_dconfms[i * H * W + pix_id];
         dL_dD = dL_dDs[pix_id];
     }
 
@@ -709,7 +709,7 @@ void BACKWARD::render(
     const float* final_Ds,          //imgState.accum_depths
 	const uint32_t* n_contrib,      //imgState.n_contrib
 	const float* dL_dpixels,        //[in], Calculated by pytorch
-	const float* dL_dconfm,          //[in], Calculated by pytorch
+	const float* dL_dconfms,          //[in], Calculated by pytorch
     const float* dL_dDs,            //[in], Calculated by pytorch
 	float3* dL_dmean2D,
 	float4* dL_dconic2D,
@@ -734,7 +734,7 @@ void BACKWARD::render(
         final_Ds,
 		n_contrib,
 		dL_dpixels,
-		dL_dconfm,
+		dL_dconfms,
         dL_dDs,
 		dL_dmean2D,
 		dL_dconic2D,

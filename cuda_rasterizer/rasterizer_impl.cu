@@ -208,6 +208,7 @@ int CudaRasterizer::Rasterizer::forward(
 	const float* means3D,
 	const float* shs,
 	const float* colors_precomp,
+	const float* conf,
 	const float* opacities,
 	const float* scales,
 	const float scale_modifier,
@@ -219,6 +220,7 @@ int CudaRasterizer::Rasterizer::forward(
 	const float tan_fovx, float tan_fovy,
 	const bool prefiltered,
 	float* out_color,
+	float* out_confmap,
     float* depth_map,
     float* weight_map,
 	int* radii,         //output. for densification
@@ -332,12 +334,14 @@ int CudaRasterizer::Rasterizer::forward(
 		width, height,
 		geomState.means2D,
 		feature_ptr,
+		conf,
 		geomState.conic_opacity,
         geomState.depths,
 		imgState.accum_alpha,   //final_T
 		imgState.n_contrib,
 		background,
 		out_color,
+		out_confmap,
         depth_map,
         weight_map),
                debug)
@@ -354,6 +358,7 @@ void CudaRasterizer::Rasterizer::backward(
 	const float* means3D,
 	const float* shs,
 	const float* colors_precomp,
+	const float* conf,
 	const float* scales,
 	const float scale_modifier,
 	const float* rotations,
@@ -369,11 +374,13 @@ void CudaRasterizer::Rasterizer::backward(
 	char* binning_buffer,
 	char* img_buffer,
 	const float* dL_dpix,   //dL_dout_color [in], Calculated by pytorch
+	const float* dL_dconfm,
     const float* dL_dDs,    //dL_dout_depth [in], Calculated by pytorch
 	float* dL_dmean2D,
 	float* dL_dconic,
 	float* dL_dopacity,
 	float* dL_dcolor,
+	float* dL_dconf,
     float* dL_ddepths,
 	float* dL_dmean3D,
 	float* dL_dcov3D,
@@ -413,17 +420,20 @@ void CudaRasterizer::Rasterizer::backward(
 		geomState.means2D,
 		geomState.conic_opacity,
 		color_ptr,      //color of each GS
+		conf,
         depths,         //depth of each GS
 		imgState.accum_alpha,
         accum_weight,   //weight map
         accum_depth,    //depth map
 		imgState.n_contrib,
 		dL_dpix,
+		dL_dconfm,
         dL_dDs,
 		(float3*)dL_dmean2D,
 		(float4*)dL_dconic,
 		dL_dopacity,
-		dL_dcolor,      //partial derivatives of each GS color
+		dL_dcolor,
+		dL_dconf,      //partial derivatives of each GS color
         dL_ddepths      //partial derivatives of each GS depth
         ), debug)
 
